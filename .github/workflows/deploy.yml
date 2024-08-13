@@ -21,10 +21,17 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - name: Deploy to AWS CloudFormation
-      run: |
-        aws cloudformation deploy \
-          --template-file terraform/template.yaml \
-          --stack-name proyecto-aws-stack \
-          --parameter-overrides KeyName=${{ secrets.EC2_KEY_NAME }} \
-          --capabilities CAPABILITY_NAMED_IAM
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./terraform
+
+    - name: Terraform Plan
+      run: terraform plan -var="key_name=${{ secrets.EC2_KEY_NAME }}"
+      working-directory: ./terraform
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve -var="key_name=${{ secrets.EC2_KEY_NAME }}"
+      working-directory: ./terraform
